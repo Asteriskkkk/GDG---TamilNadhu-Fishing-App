@@ -1,3 +1,4 @@
-# google_maps_demo
+# GDG---TamilNadhu-Fishing-App
 
-A new Flutter project.
+An AI-powered mobile application designed to help Tamil Nadu’s coastal fishermen improve fishing efficiency, comply with regulations, and promote sustainability.
+
