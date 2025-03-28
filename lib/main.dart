@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_demo/pages/map_page.dart';
+import 'package:google_maps_demo/features/map/presentation/screens/map_screen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -10,7 +10,7 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: MapPage(),
     );
