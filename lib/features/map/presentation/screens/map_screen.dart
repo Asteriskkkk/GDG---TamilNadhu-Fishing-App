@@ -20,7 +20,8 @@ class _MapPageState extends State<MapPage> {
   final ValueNotifier<bool> isInSelectedAreaNotifier = ValueNotifier<bool>(
     false,
   );
-  bool isInProximity = false;
+  final ValueNotifier<String> warningMessageNotifier = ValueNotifier<String>("");
+
 
   //custom marker code
   BitmapDescriptor customIcon = BitmapDescriptor.defaultMarker;
@@ -44,9 +45,38 @@ class _MapPageState extends State<MapPage> {
   }
   
   //checks whether user is in ocean 
-  void checkProximity(LatLng pointLatLng){
+  void checkProximity(LatLng pointLatLng) {
+  List<map_tool.LatLng> convatedPolygonPoint = PolygonCords.getAllCords().map((e) {
+    return map_tool.LatLng(e.latitude, e.longitude);
+  }).toList();
 
+  // Convert user location from Google Maps LatLng to maps_tool.LatLng
+  map_tool.LatLng userLocation = map_tool.LatLng(pointLatLng.latitude, pointLatLng.longitude);
+
+  double closestDistance = double.infinity;
+
+  // Iterate through polygon edges (each consecutive pair forms a line segment)
+  for (int i = 0; i < convatedPolygonPoint.length; i++) {
+    map_tool.LatLng start = convatedPolygonPoint[i];
+    map_tool.LatLng end = convatedPolygonPoint[(i + 1) % convatedPolygonPoint.length]; // Loop back to first point
+
+    //   shortest distance from userLocation to the line segment
+    double distance = map_tool.PolygonUtil.distanceToLine(userLocation, start, end).toDouble();
+
+    if (distance < closestDistance) {
+      closestDistance = distance;
+    }
   }
+
+  print("Closest Distance to EEZ Boundary: ${closestDistance.toStringAsFixed(2)} meters");
+
+  if (closestDistance < 5000) { // Example threshold (5 km)
+    print("⚠ Warning: Approaching international waters!");
+    warningMessageNotifier.value = "⚠ Warning: Approaching international waters! (${closestDistance.toStringAsFixed(2)} m)";
+  }else {
+    warningMessageNotifier.value = "";
+  }
+}
 
   // used to check if the updated location is in the selected area
   void checkUpdatedLocation(LatLng pointLatLng) {
@@ -95,7 +125,29 @@ class _MapPageState extends State<MapPage> {
                         ),
                       },
                     ),
+                    
                   ),
+                  
+                  ValueListenableBuilder<String>(
+                  valueListenable: warningMessageNotifier,
+                  builder: (context, message, child) {
+                    return message.isNotEmpty
+                        ? Container(
+                            padding: EdgeInsets.all(12),
+                            color: Colors.red.shade700,
+                            child: Text(
+                              message,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          )
+                        : SizedBox();
+                  },
+                ),
+
                   ValueListenableBuilder<bool>(
                     valueListenable: isInSelectedAreaNotifier,
                     builder: (context, isInFishingZone, child) {
@@ -104,6 +156,7 @@ class _MapPageState extends State<MapPage> {
                       );
                     },
                   ),
+                  
                   // every time isInSelectedArea changes the bottom bar changes
                 ],
               ),
