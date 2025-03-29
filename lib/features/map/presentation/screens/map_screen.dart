@@ -1,4 +1,4 @@
- import 'dart:async'; // Added for Timer-based debouncing
+import 'dart:async'; // Added for Timer-based debouncing
 import 'package:flutter/material.dart';
 import 'package:google_maps_demo/features/map/presentation/screens/widgets/eez_status_bar.dart';
 import 'package:google_maps_demo/features/map/data/polygon_coordinates.dart';
@@ -17,15 +17,35 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   final Location _locationController = Location();
   LatLng? _userLocation; // to store the user's current location
-  bool isInSelectedArea = false;
   final ValueNotifier<bool> isInSelectedAreaNotifier = ValueNotifier<bool>(
     false,
   );
+  bool isInProximity = false;
 
-  @override
+  //custom marker code
+  BitmapDescriptor customIcon = BitmapDescriptor.defaultMarker;
+
+  void addCustomMarker() {
+    BitmapDescriptor.asset(ImageConfiguration(size: Size(70,70)), "assets/marker1.png").then(
+      (icon) {
+        setState(() {
+          customIcon = icon;
+        });
+      },
+    );
+  }
+  //custom marker code ends
+
+  @override 
   void initState() {
     super.initState();
+    addCustomMarker();
     getLocationUpdates();
+  }
+  
+  //checks whether user is in ocean 
+  void checkProximity(LatLng pointLatLng){
+
   }
 
   // used to check if the updated location is in the selected area
@@ -42,7 +62,8 @@ class _MapPageState extends State<MapPage> {
     );
 
     if (isInSelectedAreaNotifier.value != newIsInSelectedArea) {
-        isInSelectedAreaNotifier.value = newIsInSelectedArea; // 🔹 Update notifier instead of calling setState()
+      isInSelectedAreaNotifier.value =
+          newIsInSelectedArea; // 🔹 Update notifier instead of calling setState()
     }
   }
 
@@ -68,7 +89,9 @@ class _MapPageState extends State<MapPage> {
                           draggable: true,
                           onDragEnd: (updatedLatLng) {
                             checkUpdatedLocation(updatedLatLng);
+                            checkProximity(updatedLatLng);
                           },
+                          icon: customIcon,
                         ),
                       },
                     ),
@@ -119,10 +142,10 @@ class _MapPageState extends State<MapPage> {
         _userLocation = updatedLocation;
       });
       checkUpdatedLocation(updatedLocation);
+      checkProximity(updatedLocation);
     }
 
-
-    //comment out when the drag is off 
+    //comment out when the drag is off
     // _locationController.onLocationChanged.listen((
     //   LocationData currentLocation,
     // ) {
