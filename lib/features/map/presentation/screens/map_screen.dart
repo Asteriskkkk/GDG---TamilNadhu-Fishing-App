@@ -15,68 +15,85 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  
   final Location _locationController = Location();
   LatLng? _userLocation; // to store the user's current location
   final ValueNotifier<bool> isInSelectedAreaNotifier = ValueNotifier<bool>(
     false,
   );
-  final ValueNotifier<String> warningMessageNotifier = ValueNotifier<String>("");
-
-
+  final ValueNotifier<String> warningMessageNotifier = ValueNotifier<String>(
+    "",
+  );
   //custom marker code
   BitmapDescriptor customIcon = BitmapDescriptor.defaultMarker;
 
   void addCustomMarker() {
-    BitmapDescriptor.asset(ImageConfiguration(size: Size(70,70)), "assets/marker1.png").then(
-      (icon) {
-        setState(() {
-          customIcon = icon;
-        });
-      },
-    );
+    BitmapDescriptor.asset(
+      ImageConfiguration(size: Size(70, 70)),
+      "assets/marker1.png",
+    ).then((icon) {
+      setState(() {
+        customIcon = icon;
+      });
+    });
   }
   //custom marker code ends
 
-  @override 
+  @override
   void initState() {
     super.initState();
     addCustomMarker();
     getLocationUpdates();
   }
-  
-  //checks whether user is in ocean 
+
+  //checks whether user is in ocean
   void checkProximity(LatLng pointLatLng) {
-  List<map_tool.LatLng> convatedPolygonPoint = PolygonCords.getAllCords().map((e) {
-    return map_tool.LatLng(e.latitude, e.longitude);
-  }).toList();
+    List<map_tool.LatLng> convatedPolygonPoint =
+        PolygonCords.getAllCords().map((e) {
+          return map_tool.LatLng(e.latitude, e.longitude);
+        }).toList();
 
-  // Convert user location from Google Maps LatLng to maps_tool.LatLng
-  map_tool.LatLng userLocation = map_tool.LatLng(pointLatLng.latitude, pointLatLng.longitude);
+    // Convert user location from Google Maps LatLng to maps_tool.LatLng
+    map_tool.LatLng userLocation = map_tool.LatLng(
+      pointLatLng.latitude,
+      pointLatLng.longitude,
+    );
 
-  double closestDistance = double.infinity;
+    double closestDistance = double.infinity;
 
-  // Iterate through polygon edges (each consecutive pair forms a line segment)
-  for (int i = 0; i < convatedPolygonPoint.length; i++) {
-    map_tool.LatLng start = convatedPolygonPoint[i];
-    map_tool.LatLng end = convatedPolygonPoint[(i + 1) % convatedPolygonPoint.length]; // Loop back to first point
+    // Iterate through polygon edges (each consecutive pair forms a line segment)
+    for (int i = 0; i < convatedPolygonPoint.length; i++) {
+      map_tool.LatLng start = convatedPolygonPoint[i];
+      map_tool.LatLng end =
+          convatedPolygonPoint[(i + 1) %
+              convatedPolygonPoint.length]; // Loop back to first point
 
-    //   shortest distance from userLocation to the line segment
-    double distance = map_tool.PolygonUtil.distanceToLine(userLocation, start, end).toDouble();
+      //   shortest distance from userLocation to the line segment
+      double distance =
+          map_tool.PolygonUtil.distanceToLine(
+            userLocation,
+            start,
+            end,
+          ).toDouble();
 
-    if (distance < closestDistance) {
-      closestDistance = distance;
+      if (distance < closestDistance) {
+        closestDistance = distance;
+      }
+    }
+
+    print(
+      "Closest Distance to EEZ Boundary: ${closestDistance.toStringAsFixed(2)} meters",
+    );
+
+    if (closestDistance < 5000) {
+      // Example threshold (5 km)
+      print("⚠ Warning: Approaching international waters!");
+      warningMessageNotifier.value =
+          "⚠ Warning: Approaching international waters! (${closestDistance.toStringAsFixed(2)} m)";
+    } else {
+      warningMessageNotifier.value = "";
     }
   }
-
-  print("Closest Distance to EEZ Boundary: ${closestDistance.toStringAsFixed(2)} meters");
-
-  if (closestDistance < 5000) { // Example threshold (5 km)
-    print("⚠ Warning: Approaching international waters!");
-    warningMessageNotifier.value = "⚠ Warning: Approaching international waters! (${closestDistance.toStringAsFixed(2)} m)";
-  }else {
-    warningMessageNotifier.value = "";
-  }
-}
 
   // used to check if the updated location is in the selected area
   void checkUpdatedLocation(LatLng pointLatLng) {
@@ -100,66 +117,90 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       body:
           _userLocation == null
-              ? const Center(child: CircularProgressIndicator())
-              : Column(
+              ? _buildLoadingView()
+              : Stack(
                 children: [
-                  Expanded(
-                    child: GoogleMap(
-                      initialCameraPosition: CameraPosition(
-                        target: _userLocation!,
-                        zoom: 7,
-                      ),
-                      polygons: PolygonWidget.getPolygon(),
-                      markers: {
-                        Marker(
-                          markerId: const MarkerId('marker'),
-                          position: _userLocation!,
-                          draggable: true,
-                          onDragEnd: (updatedLatLng) {
-                            checkUpdatedLocation(updatedLatLng);
-                            checkProximity(updatedLatLng);
-                          },
-                          icon: customIcon,
-                        ),
-                      },
+                  GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: _userLocation!,
+                      zoom: 7,
                     ),
-                    
-                  ),
-                  
-                  ValueListenableBuilder<String>(
-                  valueListenable: warningMessageNotifier,
-                  builder: (context, message, child) {
-                    return message.isNotEmpty
-                        ? Container(
-                            padding: EdgeInsets.all(12),
-                            color: Colors.red.shade700,
-                            child: Text(
-                              message,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          )
-                        : SizedBox();
-                  },
-                ),
-
-                  ValueListenableBuilder<bool>(
-                    valueListenable: isInSelectedAreaNotifier,
-                    builder: (context, isInFishingZone, child) {
-                      return FishingAlertBottomBar(
-                        isInFishingZone: isInFishingZone,
-                      );
+                    polygons: PolygonWidget.getPolygon(),
+                    markers: {
+                      Marker(
+                        markerId: const MarkerId('marker'),
+                        position: _userLocation!,
+                        draggable: true,
+                        onDragEnd: (updatedLatLng) {
+                          checkUpdatedLocation(updatedLatLng);
+                          checkProximity(updatedLatLng);
+                        },
+                        icon: customIcon,
+                      ),
                     },
                   ),
-                  
+
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Column(
+                      children: [
+                        ValueListenableBuilder<String>(
+                          valueListenable: warningMessageNotifier,
+                          builder: (context, message, child) {
+                            return message.isNotEmpty
+                                ? Container(
+                                  padding: EdgeInsets.all(12),
+                                  color: Colors.red.shade700,
+                                  child: Text(
+                                    message,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                )
+                                : SizedBox();
+                          },
+                        ),
+                        ValueListenableBuilder<bool>(
+                          valueListenable: isInSelectedAreaNotifier,
+                          builder: (context, isInFishingZone, child) {
+                            return FishingAlertBottomBar(
+                              isInFishingZone: isInFishingZone,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                   // every time isInSelectedArea changes the bottom bar changes
                 ],
               ),
+    );
+  }
+
+  Widget _buildLoadingView() {
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'Getting your location...',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
