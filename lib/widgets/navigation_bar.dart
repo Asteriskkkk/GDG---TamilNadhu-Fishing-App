@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_demo/features/map/presentation/screens/map_screen.dart';
+import 'package:google_maps_demo/features/weather/presentation/screens/weather_screen.dart';
 import 'package:google_maps_demo/pages/home_page.dart';
 
 class NavigationMenu extends StatefulWidget {
@@ -15,6 +16,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
   final List<Widget> _pages = [
     HomePage(),
     MapPage(),
+    WeatherScreen(),
   ];
 
   @override
@@ -32,7 +34,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
         destinations: [
           NavigationDestination(icon: Icon(Icons.home), label: "Home"),
           NavigationDestination(icon: Icon(Icons.map), label: "Map"),
-          // NavigationDestination(icon: Icon(Icons.cloud), label: "Weather"),
+          NavigationDestination(icon: Icon(Icons.cloud), label: "Weather"),
           // NavigationDestination(
           //   icon: Icon(Icons.notifications),
           //   label: "Alerts",
