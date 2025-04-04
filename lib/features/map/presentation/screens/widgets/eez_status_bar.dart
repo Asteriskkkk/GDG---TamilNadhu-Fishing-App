@@ -5,27 +5,13 @@ class FishingAlertBottomBar extends StatelessWidget {
 
   const FishingAlertBottomBar({super.key, required this.isInFishingZone});
 
-  Widget fishingZoneText(){
-    if(isInFishingZone){
-      
-      return Text("You are fishing within legal boundaries. Stay compliant and fish responsibly!");
-    }
-    else if(!isInFishingZone){
-      return Text("Alert: You are moving outside legal fishing boundaries. Return to comply with regulations.");
-    }
-    return Text("ERROR OCCURED");
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(30), 
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16.0),
-          topRight: Radius.circular(16.0),
-        ),
+        borderRadius: BorderRadius.all(Radius.circular(10)),
         boxShadow: [
           BoxShadow(
             color: Colors.black26,
@@ -40,7 +26,7 @@ class FishingAlertBottomBar extends StatelessWidget {
             color: isInFishingZone ? Colors.green : Colors.red,
             size: 24,
           ),
-          const SizedBox(width: 9.0),
+          const SizedBox(width: 10.0),
           Expanded(
             child: Text(
               isInFishingZone
