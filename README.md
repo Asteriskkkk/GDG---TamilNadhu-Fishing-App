@@ -45,6 +45,7 @@ git clone https://github.com/Asteriskkkk/GDG---TamilNadhu-Fishing-App.git
 cd smart-fishing-assistant
 flutter pub get
 flutter run
+```
 
 <img width="361" alt="image" src="https://github.com/user-attachments/assets/548b49f8-b408-4fec-9f5c-5def080b29a3" />
 <img width="356" alt="image" src="https://github.com/user-attachments/assets/d392fe84-88f0-49b7-86fd-b3221ee16466" />
