@@ -14,7 +14,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
   int currentPageIndex = 0;
 
   final List<Widget> _pages = [
-    HomePage(),
+    FishingAppHomePage(),
     MapPage(),
     WeatherScreen(),
   ];
