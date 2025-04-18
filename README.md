@@ -35,7 +35,7 @@ A Flutter-based mobile application designed for coastal fishermen to improve fis
 - **APIs Used:** 
   - OpenWeatherMap API (for weather)
   - Scraped incois fishing zone data from their website and made a cron job in GCP to update it everday
-- **Database:** Firebase to store the fishing zone data
+- **Database:** Firestore to store the fishing zone data
 
 ---
 
