@@ -17,7 +17,7 @@ A Flutter-based mobile application designed for coastal fishermen to improve fis
   - Chlorophyll concentration
   - Historical catch patterns
   - Real-time environmental conditions
-- Visualized directly on the in-app map interface.
+- Developed a Python script to scrape Potential Fishing Zone (PFZ) data from the INCOIS website and automated daily updates using a Cron job on Google Cloud Platform (GCP).
 
 ### 🌤️ Weather Updates
 - Integrates real-time weather APIs to deliver:
@@ -34,7 +34,6 @@ A Flutter-based mobile application designed for coastal fishermen to improve fis
 - **Maps & Location:** Google Maps API, Geofencing Plugin
 - **APIs Used:** 
   - OpenWeatherMap API (for weather)
-  - Scraped incois fishing zone data from their website and made a cron job in GCP to update it everday
 - **Database:** Firestore to store the fishing zone data
 
 ---
